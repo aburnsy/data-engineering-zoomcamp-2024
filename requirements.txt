@@ -1,0 +1,6 @@
+pandas
+polars
+sqlalchemy
+psycopg[binary,pool]
+pgcli
+psycopg2
