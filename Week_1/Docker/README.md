@@ -38,6 +38,28 @@ A Docker image can be thought of as a snapshot of our container. An image contai
     full params = https://docs.docker.com/engine/reference/commandline/network_create/#usage
 
 
+## Important Notes on Docker Build
+When you run the docker build command, the Docker client gathers all files that need to be sent to the Docker daemon, so it can build the image. This 'package' of files is called the context.
+
+### What files and directories are added to the context?
+The context contains all files and subdirectories in the directory that you pass to the docker build command. For example, when you call
+```
+docker build img:tag dir_to_build
+```
+the context will be everything inside dir_to_build.
+
+If the Docker client does not have sufficient permissions to read some of the files in the context, you get the error checking context: 'can't stat ' <FILENAME> error.
+
+### How can this problem be solved?
+
+#### Solution 1
+Move your Dockerfile, together with the files that are needed to build your image, to a separate directory separate_dir that contains no other files/subdirectories. When you now call docker build img:tag separate_dir, the context will only contain the files that are actually required for building the image. (If the error still persists that means you need to change the permissions on your files so that the Docker client can access them).
+
+#### Solution 2
+Exclude files from the context using a .dockerignore file. Most of the time, this is probably what you want to be doing.
+From the official Docker documentation:
+> Before the docker CLI sends the context to the docker daemon, it looks for a file named .dockerignore in the root directory of the context. If this file exists, the CLI modifies the context to exclude files and directories that match patterns in it.
+
 ## Docker Compose
 ### What is Docker Compose?
 Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application's services. Then, with a single command, you create and start all the services from your configuration.

@@ -10,18 +10,6 @@ URL2="https://github.com/DataTalksClub/nyc-tlc-data/releases/download/misc/taxi_
 #     --table_name=yellow_taxi_trips \
 #     --url=${URL}
 
-# docker run \
-#     --network=pg-network \
-#     --name ingestion \
-#     taxi_ingest:v001 \
-#     --user=root \
-#     --password=$PGADMIN_DEFAULT_PASSWORD \
-#     --host=pg-database \
-#     --port=5432 \
-#     --db=ny_taxi \
-#     --table_name=yellow_taxi_trips \
-#     --url=${URL} 
-
 docker run \
     --network=postgresql_default \
     taxi_ingest:v001 \
@@ -30,5 +18,16 @@ docker run \
     --host=pgdatabase \
     --port=5432 \
     --db=ny_taxi \
-    --table_name=zone \
-    --url=${URL2} 
+    --table_name=yellow_taxi_trips \
+    --url=${URL} 
+
+# docker run \
+#     --network=postgresql_default \
+#     taxi_ingest:v001 \
+#     --user=root \
+#     --password=$PGADMIN_DEFAULT_PASSWORD \
+#     --host=pgdatabase \
+#     --port=5432 \
+#     --db=ny_taxi \
+#     --table_name=zone \
+#     --url=${URL2} 
