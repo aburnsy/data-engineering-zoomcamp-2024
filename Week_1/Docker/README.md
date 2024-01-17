@@ -38,13 +38,21 @@ A Docker image can be thought of as a snapshot of our container. An image contai
     full params = https://docs.docker.com/engine/reference/commandline/network_create/#usage
 
 
-** Docker Compose
-***What is Docker Compose?
+## Docker Compose
+### What is Docker Compose?
 Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application's services. Then, with a single command, you create and start all the services from your configuration.
 
-*** What features does Docker Compose provice?
+### What features does Docker Compose provice?
 The key features of Compose that make it effective are:
 * Have multiple isolated environments on a single host
 * Preserve volume data when containers are created
 * Only recreate containers that have changed
 * Support variables and moving a composition between environments
+
+## Docker Ignore
+A .dockerignore is a configuration file that describes files and directories that you want to exclude when building a Docker image.
+By specifying files not to be included in the context in .dockerignore, the size of the image can be reduced. Reducing the size of the Docker image has the following advantages:
+* Faster speed when doing Docker pull/push.
+* Faster speed when building Docker images.
+
+More information on Docker ignore files can be found [https://shisho.dev/blog/posts/how-to-use-dockerignore/](here)
