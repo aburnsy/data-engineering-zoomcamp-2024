@@ -55,4 +55,4 @@ By specifying files not to be included in the context in .dockerignore, the size
 * Faster speed when doing Docker pull/push.
 * Faster speed when building Docker images.
 
-More information on Docker ignore files can be found [https://shisho.dev/blog/posts/how-to-use-dockerignore/](here)
+More information on Docker ignore files can be found [here](https://shisho.dev/blog/posts/how-to-use-dockerignore/)
