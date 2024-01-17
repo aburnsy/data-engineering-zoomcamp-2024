@@ -3,3 +3,4 @@ Week_1/Docker/postgreSQL/pg_admin_data/**
 **input_csvs**
 **/output.csv
 *.env
+config**
