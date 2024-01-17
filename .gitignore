@@ -4,3 +4,4 @@ Week_1/Docker/postgreSQL/pg_admin_data/**
 **/output.csv
 *.env
 config**
+**homework.md

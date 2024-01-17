@@ -33,9 +33,9 @@ def main(params):
 
     # Setup the table
     df = pd.read_csv(file_name, nrows=0)
-    if "tpep_pickup_datetime" in df.columns:
-        df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-        df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+    if "lpep_pickup_datetime" in df.columns:
+        df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
+        df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
     df.head(0).to_sql(name=table_name, con=engine, if_exists="replace")
 
     # Loop through all csv data
@@ -43,9 +43,9 @@ def main(params):
 
     while (df := next(df_iter, None)) is not None:
         time_start = time()
-        if "tpep_pickup_datetime" in df.columns:
-            df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-            df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+        if "lpep_pickup_datetime" in df.columns:
+            df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
+            df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
 
         df.to_sql(name=table_name, con=engine, if_exists="append")
 
