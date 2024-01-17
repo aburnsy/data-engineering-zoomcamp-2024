@@ -15,28 +15,37 @@ def main(params):
     db = params.db
     table_name = params.table_name
     url = params.url
-    csv_name = "output.csv"
 
-    # download the csv
-    os.system(f"curl -L0 {url} --Output {csv_name}.gz")
-    os.system(f"gzip -d {csv_name}.gz")
+    # Get file information
+    base_file: str = url.split("/")[-1]
+    is_gzipped = base_file.split(".")[-1] == "gz"
+    if is_gzipped:
+        file_name = base_file[0:-3]
+    else:
+        file_name = base_file
+
+    # download the file
+    os.system(f"curl -L0 {url} --Output {base_file}")
+    if is_gzipped:
+        os.system(f"gzip -d {base_file}")
 
     engine = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{db}")
 
     # Setup the table
-    df = pd.read_csv(csv_name, nrows=0)
-    df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-    df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+    df = pd.read_csv(file_name, nrows=0)
+    if "tpep_pickup_datetime" in df.columns:
+        df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
+        df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
     df.head(0).to_sql(name=table_name, con=engine, if_exists="replace")
 
     # Loop through all csv data
-    df_iter = pd.read_csv(csv_name, iterator=True, chunksize=200000)
+    df_iter = pd.read_csv(file_name, iterator=True, chunksize=200000)
 
     while (df := next(df_iter, None)) is not None:
         time_start = time()
-
-        df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
-        df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
+        if "tpep_pickup_datetime" in df.columns:
+            df.tpep_pickup_datetime = pd.to_datetime(df.tpep_pickup_datetime)
+            df.tpep_dropoff_datetime = pd.to_datetime(df.tpep_dropoff_datetime)
 
         df.to_sql(name=table_name, con=engine, if_exists="append")
 

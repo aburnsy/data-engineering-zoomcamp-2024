@@ -36,3 +36,15 @@ A Docker image can be thought of as a snapshot of our container. An image contai
     build will utilise CACHED images if possible to speed up overall build
 * docker create network -> Creates a new network. Bridge networks are isolated networks on a single Engine installation. If you want to create a network that spans multiple Docker hosts each running an Engine, you must enable Swarm mode, and create an overlay network. To read more about overlay networks with Swarm mode 
     full params = https://docs.docker.com/engine/reference/commandline/network_create/#usage
+
+
+** Docker Compose
+***What is Docker Compose?
+Compose is a tool for defining and running multi-container Docker applications. With Compose, you use a YAML file to configure your application's services. Then, with a single command, you create and start all the services from your configuration.
+
+*** What features does Docker Compose provice?
+The key features of Compose that make it effective are:
+* Have multiple isolated environments on a single host
+* Preserve volume data when containers are created
+* Only recreate containers that have changed
+* Support variables and moving a composition between environments
