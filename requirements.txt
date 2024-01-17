@@ -4,3 +4,5 @@ sqlalchemy
 psycopg[binary,pool]
 pgcli
 psycopg2
+jupyter
+argparse

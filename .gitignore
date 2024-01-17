@@ -1,2 +1,5 @@
 Week_1/Docker/postgreSQL/ny_taxi_postgres_data/**
-Week_1/Docker/**
+Week_1/Docker/postgreSQL/pg_admin_data/**
+**input_csvs**
+**/output.csv
+*.env
