@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 # coding: utf-8
-import pandas as pd
-from sqlalchemy import create_engine
+import polars as pl
 from time import time
 import argparse
 import os
+import importlib
 
 
 def main(params):
@@ -16,8 +16,11 @@ def main(params):
     db = params.db
     table_name = params.table_name
     url = params.url
+    schema_file = "config.schema_" + table_name
 
-    # Get file information
+    # print(f"Loading Schema information for table {table_name}")
+    schema = importlib.import_module(schema_file)
+
     base_file: str = url.split("/")[-1]
     is_gzipped = base_file.split(".")[-1] == "gz"
     if is_gzipped:
@@ -30,32 +33,48 @@ def main(params):
     if is_gzipped:
         os.system(f"gzip -d {base_file}")
 
-    engine = create_engine(f"postgresql://{user}:{password}@{host}:{port}/{db}")
+    connection = f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
-    # Setup the table
-    df = pd.read_csv(file_name, nrows=0)
-    if "lpep_pickup_datetime" in df.columns:
-        df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
-        df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
-    df.head(0).to_sql(name=table_name, con=engine, if_exists="replace")
+    # Batch the csv file for reading later
+    csv_reader = pl.read_csv_batched(
+        file_name, dtypes=schema.dtypes, ignore_errors=True
+    )
+
+    # Read the first batch of data and overwrite existing database with this information
+    time_start = time()
+    record_counts = (
+        csv_reader.next_batches(1)[0]
+        .rename(schema.rename_columns)
+        .with_columns(schema.new_columns)
+        .write_database(
+            table_name=table_name,
+            connection=connection,
+            engine="adbc",
+            if_table_exists="replace",
+        )
+    )
+    print(
+        f"Inserted first chunk of {record_counts}, taking {format(time()-time_start,'.3f')} seconds"
+    )
 
     # Loop through all csv data
-    df_iter = pd.read_csv(file_name, iterator=True, chunksize=200000)
-
-    while (df := next(df_iter, None)) is not None:
+    while (batches := csv_reader.next_batches(1)) is not None:
         time_start = time()
-        if "lpep_pickup_datetime" in df.columns:
-            df.lpep_pickup_datetime = pd.to_datetime(df.lpep_pickup_datetime)
-            df.lpep_dropoff_datetime = pd.to_datetime(df.lpep_dropoff_datetime)
-
-        df.to_sql(name=table_name, con=engine, if_exists="append")
-
-        time_end = time()
-
-        print(
-            f"Inserted another chunk, taking {format(time_end-time_start,'.3f')} seconds"
+        record_counts = (
+            batches[0]
+            .rename(schema.rename_columns)
+            .with_columns(schema.new_columns)
+            .write_database(
+                table_name=table_name,
+                connection=connection,
+                engine="adbc",
+                if_table_exists="append",
+            )
         )
 
+        print(
+            f"Inserted another chunk of {record_counts}, taking {format(time()-time_start,'.3f')} seconds"
+        )
     print(f"Total Time Taken: {format(time()-time_starts,'.3f')} seconds")
 
 

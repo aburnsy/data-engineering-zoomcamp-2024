@@ -21,13 +21,24 @@ docker run \
     --table_name=yellow_taxi_trips \
     --url=${URL} 
 
+# docker run \
+#     --network=postgresql_default \
+#     taxi_ingest:v001 \
+#     --user=root \
+#     --password=$PGADMIN_DEFAULT_PASSWORD \
+#     --host=pgdatabase \
+#     --port=5432 \
+#     --db=ny_taxi \
+#     --table_name=zone \
+#     --url=${URL2} 
+
 docker run \
     --network=postgresql_default \
-    taxi_ingest:v001 \
+    taxi_ingest_pl:v001 \
     --user=root \
     --password=$PGADMIN_DEFAULT_PASSWORD \
     --host=pgdatabase \
     --port=5432 \
     --db=ny_taxi \
-    --table_name=zone \
-    --url=${URL2} 
+    --table_name=yellow_taxi_data \
+    --url=${URL} 

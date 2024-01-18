@@ -6,3 +6,6 @@ pgcli
 psycopg2
 jupyter
 argparse
+adbc_driver_manager
+adbc-driver-postgresql
+pyarrow
