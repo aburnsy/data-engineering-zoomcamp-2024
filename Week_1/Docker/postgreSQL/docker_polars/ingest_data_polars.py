@@ -7,6 +7,17 @@ import os
 import importlib
 
 
+def download_csv_file(url: str) -> str:
+    # download the file and decompress if required - Polars doesn't handle this well
+    base_file: str = url.split("/")[-1]
+    is_gzipped = base_file.split(".")[-1] == "gz"
+    file_name = base_file[0:-3] if is_gzipped else base_file
+    os.system(f"curl -L0 {url} --Output {base_file}")
+    if is_gzipped:
+        os.system(f"gzip -d {base_file}")
+    return file_name
+
+
 def main(params):
     time_starts = time()
     user = params.user
@@ -16,45 +27,20 @@ def main(params):
     db = params.db
     table_name = params.table_name
     url = params.url
-    schema_file = "config.schema_" + table_name
 
-    # print(f"Loading Schema information for table {table_name}")
-    schema = importlib.import_module(schema_file)
+    file_name = download_csv_file(url)
 
-    base_file: str = url.split("/")[-1]
-    is_gzipped = base_file.split(".")[-1] == "gz"
-    if is_gzipped:
-        file_name = base_file[0:-3]
-    else:
-        file_name = base_file
+    # Fetch the schema file from the attached volume
+    schema = importlib.import_module("config.schema_" + table_name)
 
-    # download the file
-    os.system(f"curl -L0 {url} --Output {base_file}")
-    if is_gzipped:
-        os.system(f"gzip -d {base_file}")
-
+    # Setup connection to PG
     connection = f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
     # Batch the csv file for reading later
     csv_reader = pl.read_csv_batched(file_name, dtypes=schema.dtypes)
 
-    # Read the first batch of data and overwrite existing database with this information
-    time_start = time()
-    record_counts = (
-        csv_reader.next_batches(1)[0]
-        .rename(schema.rename_columns)
-        .with_columns(schema.new_columns)
-        .drop(schema.drop_columns)
-        .write_database(
-            table_name=table_name,
-            connection=connection,
-            engine="adbc",
-            if_table_exists="replace",
-        )
-    )
-    print(
-        f"Inserted first chunk of {record_counts}, taking {format(time()-time_start,'.3f')} seconds"
-    )
+    # First chunk should replace existing table
+    if_table_exists = "replace"
 
     # Loop through all csv data
     while (batches := csv_reader.next_batches(1)) is not None:
@@ -68,13 +54,17 @@ def main(params):
                 table_name=table_name,
                 connection=connection,
                 engine="adbc",
-                if_table_exists="append",
+                if_table_exists=if_table_exists,
             )
         )
 
+        # After the first chunk, we need to append records
+        if_table_exists = "append"
+
         print(
-            f"Inserted another chunk of {record_counts}, taking {format(time()-time_start,'.3f')} seconds"
+            f"Inserted chunk containing {record_counts} records, taking {format(time()-time_start,'.3f')} seconds"
         )
+
     print(f"Total Time Taken: {format(time()-time_starts,'.3f')} seconds")
 
 
