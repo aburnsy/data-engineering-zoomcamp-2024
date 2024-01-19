@@ -31,7 +31,7 @@ That allows to set batches within the while statement. If csv_reader is exhauste
 The write_database function allows us to write the dataframe back to the DB. We can use 1 of 2 engines to accomplish this - the default, sqlalchemy (which we also used for Pandas library) or ADBC. In the SQLAlchemy approach, Polars actually converts the df to a Pandas df backed by PyArrow and then uses SQLAlchemy methods on the Pandas df. ADBC or Arrow Database Connectivity is an engine supported by the Apache Arrow project. ADBC is in its infancy still and many databases are still not [feature complete](https://arrow.apache.org/adbc/main/driver/status.html). For want we are looking to accomplish, ADBC will work. Note on the link though that PostgreSQl does not have full type support. This is something I noticed myself when testing, as the full set of Polars DTypes aren't supported by adbc_driver_postgresql. 
 
 To use ADBC with Polars, we need to install additional packages. Back in our Dockerfile, we should have
-```Docker
+```docker
 FROM python:3.12.1
 
 RUN pip install polars adbc_driver_manager adbc-driver-postgresql pyarrow
