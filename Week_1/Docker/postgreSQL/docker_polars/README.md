@@ -199,7 +199,7 @@ It would be a better idea to push the dictionary data for the `rate_code` and `p
 We could add a dictionary for each table, within the main `ingest_data_polars.py` script, however, each time we wanted to change the data type, we would need to rebuild our Docker image. Its also not a great idea to mix configuration and application code. 
 
 Instead we can pass a volume across when running the image. Within this folder, we can then house a `schema.py` file for each table. Any time we want to update the meta data within these files, we can update the file directly. The next time the image is run, it will have access to the latest version of these files. Our new bash script should look like this:
-```bash
+```console
 docker run \
     --network=postgresql_default \
     -v D:/Development/data-engineering-zoomcamp-2024/Week_1/Docker/postgreSQL/docker_polars/config:/app/config \
