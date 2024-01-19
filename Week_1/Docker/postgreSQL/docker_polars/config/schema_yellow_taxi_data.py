@@ -22,7 +22,7 @@ dtypes = OrderedDict(
         "total_amount": pl.Float32,
         "payment_type": pl.Int32,
         "trip_type": pl.Int32,
-        "congestion_surcharge": pl.Float64,
+        "congestion_surcharge": pl.Float32,
     }
 )
 
