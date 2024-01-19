@@ -221,10 +221,10 @@ docker run \
 We can add files for each table in our config folder. Our structure should look like this:
 ```bash
     ├── config                              
-    │   ├── schema_yellow_taxi_data.py      # Contains `dtypes`, `rename_columns` and other dictionaries needed for `taxi` data
-    │   ├── schema_zone_data.py             # Contains `dtypes`, `rename_columns` and other dictionaries needed for `zone` data
+    │   ├── schema_yellow_taxi_data.py      # Contains dtypes, rename_columns and other dictionaries needed for taxi data
+    │   ├── schema_zone_data.py             # Contains dtypes, rename_columns and other dictionaries needed for zone data
     ├── Dockerfile
-    ├── .dockerignore                       # Should include the `config` folder as we don't want that included in Docker context during build
+    ├── .dockerignore                       # Should include the config folder as we don't want that included in Docker context during build
     └── ingest_data_polars.py               # Our polars ingestion script
 ```
 > .dockerignore should ignore the config folder
