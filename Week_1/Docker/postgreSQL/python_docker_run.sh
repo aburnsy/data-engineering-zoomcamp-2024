@@ -10,7 +10,7 @@ ZONE_DATA="https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
 #     --table_name=yellow_taxi_trips \
 #     --url=${URL}
 
-## TAXI USING PANDAS
+# TAXI USING PANDAS
 # docker run \
 #     --network=postgresql_default \
 #     taxi_ingest:v001 \
@@ -20,9 +20,9 @@ ZONE_DATA="https://s3.amazonaws.com/nyc-tlc/misc/taxi+_zone_lookup.csv"
 #     --port=5432 \
 #     --db=ny_taxi \
 #     --table_name=yellow_taxi_trips \
-#     --url=${URL} 
+#     --url=${TAXI_DATA} 
 
-## ZONE USING PANDAS
+# # ZONE USING PANDAS
 # docker run \
 #     --network=postgresql_default \
 #     taxi_ingest:v001 \
@@ -47,14 +47,15 @@ docker run \
     --table_name=yellow_taxi_data \
     --url=${TAXI_DATA} 
 
-# docker run \
-#     --network=postgresql_default \
-#     -v D:/Development/data-engineering-zoomcamp-2024/Week_1/Docker/postgreSQL/docker_polars/config:/app/config \
-#     taxi_ingest_pl:v001 \
-#     --user=root \
-#     --password=$PGADMIN_DEFAULT_PASSWORD \
-#     --host=pgdatabase \
-#     --port=5432 \
-#     --db=ny_taxi \
-#     --table_name=zone_data \
-#     --url=${ZONE_DATA}     
+## ZONE USING POLARS
+docker run \
+    --network=postgresql_default \
+    -v D:/Development/data-engineering-zoomcamp-2024/Week_1/Docker/postgreSQL/docker_polars/config:/app/config \
+    taxi_ingest_pl:v001 \
+    --user=root \
+    --password=$PGADMIN_DEFAULT_PASSWORD \
+    --host=pgdatabase \
+    --port=5432 \
+    --db=ny_taxi \
+    --table_name=zone_data \
+    --url=${ZONE_DATA}     
