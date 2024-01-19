@@ -29,11 +29,15 @@ This returns an instance of BatchedCsvReader, which we can call the `next_batche
 while (batches := csv_reader.next_batches(1)) is not None:
     print(batches[0].head(1))
 ```
-Here we are looping through our csv_reader, loading 1 batch and printing the first row from it. Notice the walrus operator:
+> We are looping through our csv_reader, loading 1 batch and printing the first row from it. 
+
+Notice the walrus operator:
 ```python
 batches := csv_reader.next_batches(1)
 ```
-This allows us to set the `batches` variable within the while statement. If `csv_reader` is exhausted, the `next_batches` method will return None and we will exit the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case. It is best to leave that set to 1 for now. Though this is an option to explore further another day.
+> Walrus Operator := allows us to set the `batches` variable within the while statement. 
+
+If `csv_reader` is exhausted, the `next_batches` method will return None and we will exit the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case. It is best to leave that set to 1 for now. Though this is an option to explore further another day.
 
 ### Writing to the database
 The `write_database` function allows us to write the dataframe back to the DB. We can use 1 of 2 engines to accomplish this:
@@ -76,7 +80,7 @@ while (batches := csv_reader.next_batches(1)) is not None:
     # After the first chunk, we need to append records
     if_table_exists = "append"
 ```
-Notice that we are amending the `if_table_exists` variable after the first run. Otherwise, we would replace the table with the latest chunk from the csv file on each iteration. 
+> We are amending the `if_table_exists` variable after the first run. Otherwise, we would replace the table with the latest chunk on each iteration. 
 
 ### Passing dtypes
 Polars, by default, will use the first 100 rows of data to infer the data type of each column. If the first 100 rows are null, or the entries are ambiguous, the dtype defaults to string. 
@@ -253,14 +257,14 @@ The final script can be found [here](ingest_data_polars.py).
 
 ## Further improvements
 There are a number of further improvements I would like to make from this point:
-1. Improve configuration management
+1. Improve configuration management  
   In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. 
 
-2. Push postgres info to a config file
+2. Push postgres info to a config file  
   Similar to (1) above. Passing the host, port etc. is redundant.
 
-3. Use SOLID Principles
+3. Use SOLID Principles  
   Using SOLID principles (which are generally for OOP but can be applied to the functional paradigm also), we could improve the flow in the main function. 
 
-4. Add Unit Testing
+4. Add Unit Testing  
   We could add unit tests to our functions after we have applied SOLID principles.
