@@ -76,12 +76,13 @@ while (batches := csv_reader.next_batches(1)) is not None:
     # After the first chunk, we need to append records
     if_table_exists = "append"
 ```
-Notice that we are amending the `if_table_exists` variable after the first run. Otherwise, we would constantly be replacing the table with the latest chunk from the csv file. 
+Notice that we are amending the `if_table_exists` variable after the first run. Otherwise, we would replace the table with the latest chunk from the csv file on each iteration. 
 
 ### Passing dtypes
-Polars, by default, will use the first 100 rows of data to infer the data type of each column. If the first 100 rows are null or the entries are ambiguous, the dtype defaults to string. Additionally, if we have lots of columns or if we ask Polars to check more than 100 rows (through the infer_schema_length parameter), this could impact ingestion performance. Finally, Polars tends to prefer larger memory data types than smaller (though I can't find this exactly in their documenation). It seems to default to Int64 for rows which might only contain 1 and 2. 
+Polars, by default, will use the first 100 rows of data to infer the data type of each column. If the first 100 rows are null, or the entries are ambiguous, the dtype defaults to string. 
+If we have lots of columns or if we ask Polars to check more than 100 rows (through the `infer_schema_length` parameter), this could impact ingestion performance. Finally, Polars tends to prefer larger memory data types than smaller (though I can't find this exactly in their documenation). It seems to default to Int64 for rows which might only contain 1 and 2. 
 
-To prevent this and improvement performance, we can pass Polars the data types of our fields from the csv file. For this, we use the dtypes parameter in the `read_csv` and `read_csv_batched` functions. In python, the `dtypes` param should be of `OrderedDict` Type. For the yellow taxi data, it might look like this
+To prevent this and improvement performance, we can pass Polars the data types of our fields from the csv file. For this, we use the `dtypes` parameter in the `read_csv` and `read_csv_batched` functions. In python, the `dtypes` param should be of `OrderedDict` Type. For the yellow taxi data, it might look like this
 ```python
 # Batch the csv file for reading later
 from collections import OrderedDict
@@ -112,7 +113,7 @@ dtypes = OrderedDict(
 csv_reader = pl.read_csv_batched(file_name, dtypes=dtypes)
 ```
 
-If you run the script again now, you should see the data types in the database change. Some integer fields go from `BIGINT` to `INTEGER`, which should use less memory.
+If you run the script again, you should see the data types in the database change. Some integer fields go from `BIGINT` to `INTEGER`, which should use less memory.
 
 ### Renaming, Adding or Dropping Columns
 We can easily add, remove or update columns in Polars. In fact, this can be done very efficiently by chaining the function calls together like so
@@ -126,25 +127,25 @@ df
 .drop('c')
 ```
 
-For us, we might want to rename columns to:
-1. Give a friendly name that makes sense to us
-2. Force all column names to use the correct format for Postgres - lower case with underscores. This has the added benefit that queries won't then need quotes around column names.
+For us, we might want to rename some columns to:
+1. Give a more friendly name that makes sense to us
+2. Force all column names to use the correct format for Postgres - lower_case_with_underscores. This has the added benefit that queries won't then need quotes around field names.
 
 With respect to new columns, we could:
 1. Create start and end date columns, since many of our queries use the datetime fields
-2. Convert the flag field (which has "Y" & "N" entries) to a boolean
+2. Create a new boolean column for store_and_fwd_flag (which has "Y" & "N" entries)
 3. Use the dictionaries supplied in the [data dictionary](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf) to map to their corresponding text field
 
 Here's what we could end up with
 ```python
 rename_columns = {
-    "VendorID": "vendor_id",
-    "lpep_pickup_datetime": "start_datetime",
-    "lpep_dropoff_datetime": "end_datetime",
-    "RatecodeID": "rate_code_id",
-    "PULocationID": "start_location_id",
-    "DOLocationID": "end_location_id",
-    "payment_type": "payment_type_id",
+    "VendorID":                 "vendor_id",
+    "lpep_pickup_datetime":     "start_datetime",
+    "lpep_dropoff_datetime":    "end_datetime",
+    "RatecodeID":               "rate_code_id",
+    "PULocationID":             "start_location_id",
+    "DOLocationID":             "end_location_id",
+    "payment_type":             "payment_type_id",
 }
 
 # Sourced from https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
@@ -189,13 +190,13 @@ while (batches := csv_reader.next_batches(1)) is not None:
     )
 ```
 
-If we re-run again at this stage, we should see our new fields get created.
+If we re-run our script now, we should see our new fields get created.
 
 ### Adding Schema/Config Data through Attached Volume
 
-We could add a dictionary for each table within the main ingest_data_polars.py script, however, each time we wanted to change the data type, we would need to rebuild our image. Ideally we would avoid that since this is really meta data/configuration data and not application code. 
+We could add a dictionary for each table, within the main ingest_data_polars.py script, however, each time we wanted to change the data type, we would need to rebuild our Docker image. Its also not a great idea to mix configuration and application code. 
 
-Instead we can pass a volume across when running the image. Within this folder, we can have add a schema.py file for each table. Any time we want to update the meta data within it, we can update the file directly. The next time the image is run, it will have access to the latest version of these files. Our new bash script should look like this:
+Instead we can pass a volume across when running the image. Within this folder, we can add a schema.py file for each table. Any time we want to update the meta data within these files, we can update the file directly. The next time the image is run, it will have access to the latest version of these files. Our new bash script should look like this:
 ```bash
 docker run \
     --network=postgresql_default \
@@ -218,8 +219,9 @@ import importlib
 # Fetch the schema file for the corresponding table_name from the attached volume
 schema = importlib.import_module("config.schema_" + table_name)
 ```
+Here we are fynamically loading the config\schema.py file for the corresponding table.
 
-And in our polars functions, we reference the `schema` variable
+Finally, in our polars functions, we reference the `schema` variable to source this configuration data:
 ```python
 batches[0]
 .rename(schema.rename_columns)
@@ -240,10 +242,14 @@ The final script can be found [here](ingest_data_polars.py).
 ## Further improvements
 There are a number of further improvements I would like to make from this point:
 1. Improve configuration management
+
 In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. 
 2. Push postgres info to a config file
+
 Similar to (1) above. Passing the host, port etc. is redundant.
 3. Use SOLID on main() function
+
 Using SOLID principles (which are generally for OOP but can be applied to functional paradigm also) we could improve the flow in the main function. 
 4. Add Unit Testing
+
 We could add unit tests to our functions after we have applied SOLID principles.
