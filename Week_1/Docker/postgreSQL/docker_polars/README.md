@@ -224,13 +224,14 @@ We can add files for each table in our config folder. Our structure should look 
     └── ingest_data_polars.py               # Our polars ingestion script
 ```
 > .dockerignore should ignore the config folder
+
 Now in our main Polars script, we want to reference these files.
 ```python
 import importlib
 # Fetch the schema file for the corresponding table_name from the attached volume
 schema = importlib.import_module("config.schema_" + table_name)
 ```
-Here we are fynamically loading the config\schema.py file for the corresponding table.
+> We are dynamically loading the config\schema.py file for the corresponding table.
 
 Finally, in our polars functions, we reference the `schema` variable to source this configuration data:
 ```python
@@ -252,18 +253,7 @@ The final script can be found [here](ingest_data_polars.py).
 
 ## Further improvements
 There are a number of further improvements I would like to make from this point:
-1.** Improve configuration management**
-
-In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. 
-
-2.** Push postgres info to a config file**
-
-Similar to (1) above. Passing the host, port etc. is redundant.
-
-3.** Use SOLID on main() function**
-
-Using SOLID principles (which are generally for OOP but can be applied to the functional paradigm also), we could improve the flow in the main function. 
-
-4.** Add Unit Testing**
-
-We could add unit tests to our functions after we have applied SOLID principles.
+| Improve configuration | In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. |
+| Push postgres info to a config file | Similar to above. Passing the host, port etc. is redundant |
+| Use SOLID principles | Using SOLID principles (which are generally for OOP but can be applied to the functional paradigm also), we could improve the flow in the main function. |
+| Unit Testing | We could add unit tests to our functions after we have applied SOLID principles. |
