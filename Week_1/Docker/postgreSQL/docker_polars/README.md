@@ -195,7 +195,7 @@ If we re-run again at this stage, we should see our new fields get created.
 
 We could add a dictionary for each table within the main ingest_data_polars.py script, however, each time we wanted to change the data type, we would need to rebuild our image. Ideally we would avoid that since this is really meta data/configuration data and not application code. 
 
-Instead we can pass a volume across when running the image. Within this folder, we can have add a config file for each table. Any time we want to update the meta data within it, we can update the file directly. The next time the image is run, it will have access to the latest version of these files. Our new bash script should look like this:
+Instead we can pass a volume across when running the image. Within this folder, we can have add a schema.py file for each table. Any time we want to update the meta data within it, we can update the file directly. The next time the image is run, it will have access to the latest version of these files. Our new bash script should look like this:
 ```bash
 docker run \
     --network=postgresql_default \
@@ -239,4 +239,11 @@ The final script can be found [here](ingest_data_polars.py)
 
 ## Further improvements
 There are a number of further improvements I would like to make from this point:
-(1)
+(1) Improve configuration management
+In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. 
+(2) Push postgres info to a config file
+Similar to (1) above. Passing the host, port etc. is redundant.
+(3) Use SOLID on main() function
+Using SOLID principles (which are generally for OOP but can be applied to functional paradigm also) we could improve the flow in the main function. 
+(4) Add Unit Testing
+We could add unit tests to our functions after we have applied SOLID principles.
