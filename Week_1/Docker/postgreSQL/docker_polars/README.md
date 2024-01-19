@@ -1,7 +1,7 @@
 # Converting our data ingestion to use Polars + Some general improvements to the script
 
 ## What is Polars
-Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. This isn't an 'Intro to Polars' article OR a 'Pandas v Polars' article (of which there are many online - including some by a course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). So I'll leave the intro at that.
+Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. This isn't an 'Intro to Polars' article OR a 'Pandas v Polars' article (of which there are many online - including some by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). So I'll leave the intro at that.
 
 ## Starting with the results
 Polars Total Time Taken: 6.958 seconds
@@ -131,9 +131,9 @@ For us, we might want to rename columns to:
     (2) Force all column names to use the correct format for Postgres - lower case with underscores. This has the added benefit that queries won't then need quotes around column names.
 
 Wrt new columns, we could:
-    (1) Create start and end date columns - since many of our queries use the datetime fields
-    (2) Convert the flag field (which has "Y" & "N" entries) to a boolean
-    (3) Use the dictionaries supplied in the [data dictionary](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf) to map to their corresponding text field
+1. Create start and end date columns - since many of our queries use the datetime fields
+2. Convert the flag field (which has "Y" & "N" entries) to a boolean
+3. Use the dictionaries supplied in the [data dictionary](https://www.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf) to map to their corresponding text field
 
 Here's what we could end up with
 ```python
@@ -242,11 +242,11 @@ The final script can be found [here](ingest_data_polars.py)
 
 ## Further improvements
 There are a number of further improvements I would like to make from this point:
-(1) Improve configuration management
+1. Improve configuration management
 In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. 
-(2) Push postgres info to a config file
+2. Push postgres info to a config file
 Similar to (1) above. Passing the host, port etc. is redundant.
-(3) Use SOLID on main() function
+3. Use SOLID on main() function
 Using SOLID principles (which are generally for OOP but can be applied to functional paradigm also) we could improve the flow in the main function. 
-(4) Add Unit Testing
+4. Add Unit Testing
 We could add unit tests to our functions after we have applied SOLID principles.
