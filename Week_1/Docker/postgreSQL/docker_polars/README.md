@@ -1,7 +1,7 @@
 # Converting our data ingestion to use Polars + Some general improvements to the script
 
 ## What is Polars
-Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. This isn't an 'Intro to Polars' article OR a 'Pandas v Polars' article (of which there are many online - including some by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). The best way to learn about Polars is to play around with it yourself.
+Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. There are numerous articles out there on 'Intro to Polars' OR 'Pandas v Polars' (including a good one by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). 
 
 ## Starting with the results
 | Library | Total Time Taken |
