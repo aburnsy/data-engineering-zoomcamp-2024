@@ -4,11 +4,12 @@
 Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. This isn't an 'Intro to Polars' article OR a 'Pandas v Polars' article (of which there are many online - including some by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). So I'll leave the intro at that.
 
 ## Starting with the results
-Polars Total Time Taken: 6.958 seconds
+| Library | Total Time Taken |
+| --- | --- |
+| `Polars` | 6.958 seconds |
+| `Pandas` | 46.041 seconds |
 
-Pandas Total Time Taken: 46.041 seconds
-
-Polars is roughly 85% faster than Pandas for our very simple ingestion script. 
+Polars is roughly **85% faster** than Pandas for our very simple ingestion script. 
 
 **Note** that this isn't a perfect comparison. In my Polars script, I am creating a handful of new fields. In Polars too I am passing the dtypes of the fields, which does have an impact.
 
@@ -237,7 +238,7 @@ batches[0]
 ```
 
 ## Final Script
-The final script can be found [here](ingest_data_polars.py)
+The final script can be found [here](ingest_data_polars.py).
 
 
 ## Further improvements
