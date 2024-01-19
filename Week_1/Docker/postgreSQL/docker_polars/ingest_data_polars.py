@@ -36,9 +36,7 @@ def main(params):
     connection = f"postgresql://{user}:{password}@{host}:{port}/{db}"
 
     # Batch the csv file for reading later
-    csv_reader = pl.read_csv_batched(
-        file_name, dtypes=schema.dtypes, ignore_errors=True
-    )
+    csv_reader = pl.read_csv_batched(file_name, dtypes=schema.dtypes)
 
     # Read the first batch of data and overwrite existing database with this information
     time_start = time()
@@ -46,6 +44,7 @@ def main(params):
         csv_reader.next_batches(1)[0]
         .rename(schema.rename_columns)
         .with_columns(schema.new_columns)
+        .drop(schema.drop_columns)
         .write_database(
             table_name=table_name,
             connection=connection,
@@ -64,6 +63,7 @@ def main(params):
             batches[0]
             .rename(schema.rename_columns)
             .with_columns(schema.new_columns)
+            .drop(schema.drop_columns)
             .write_database(
                 table_name=table_name,
                 connection=connection,
