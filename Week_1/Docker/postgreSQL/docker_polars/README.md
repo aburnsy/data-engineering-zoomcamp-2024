@@ -33,10 +33,12 @@ Here we are looping through our csv_reader, loading 1 batch and printing the fir
 ```python
 batches := csv_reader.next_batches(1)
 ```
-This allows us to set the batches variable within the while statement. If csv_reader is exhausted, the `next_batches` method will return None and we will exit the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case, so its best to leave that set to 1 for now. This is an option to explore further another day.
+This allows us to set the `batches` variable within the while statement. If csv_reader is exhausted, the `next_batches` method will return None and we will exit the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case, so its best to leave that set to 1 for now. This is an option to explore further another day.
 
 ### Writing to the database
-The write_database function allows us to write the dataframe back to the DB. We can use 1 of 2 engines to accomplish this - the default, sqlalchemy (which we also used for Pandas library) or ADBC. In the SQLAlchemy approach, Polars actually converts the df to a Pandas df backed by PyArrow and then uses SQLAlchemy methods on the Pandas df. ADBC or Arrow Database Connectivity is an engine supported by the Apache Arrow project. ADBC is in its infancy still and many databases are still not [feature complete](https://arrow.apache.org/adbc/main/driver/status.html). For want we are looking to accomplish, ADBC will work. Note on the link though that PostgreSQl does not have full type support. This is something I noticed myself when testing, as the full set of Polars DTypes aren't supported by adbc_driver_postgresql. 
+The `write_database` function allows us to write the dataframe back to the DB. We can use 1 of 2 engines to accomplish this:
+1. With the default engine, SQLAlchemy, Polars first converts the dataframe to a Pandas dataframe backed by PyArrow and then uses SQLAlchemy methods on the Pandas dataframe to export to the DB.
+2. ADBC or Arrow Database Connectivity is an engine supported by the Apache Arrow project. ADBC is in its infancy still and many databases are not yet [feature complete](https://arrow.apache.org/adbc/main/driver/status.html). However, for what we are looking to accomplish, ADBC will work. Note on the link though that PostgreSQl does not have full type support. This is something we noted when testing, as the full set of Polars DTypes (e.g. Int8,Int16) aren't supported by adbc_driver_postgresql. 
 
 To use ADBC with Polars, we need to install additional packages. Back in our Dockerfile, we should have
 ```Dockerfile
@@ -50,7 +52,7 @@ COPY ingest_data_polars.py ingest_data_polars.py
 ENTRYPOINT [ "python", "ingest_data_polars.py" ]
 ```
 
-Back in our Python script, we can now export directly to the database
+Now, in our Python script, we can now export directly to the database
 ```python
 # Setup connection to PG
 connection = f"postgresql://{user}:{password}@{host}:{port}/{db}"
@@ -63,26 +65,23 @@ if_table_exists = "replace"
 
 # Loop through all csv data
 while (batches := csv_reader.next_batches(1)) is not None:
-    time_start = time()
-    record_counts = (
-        batches[0]
-        .write_database(
-            table_name=table_name,
-            connection=connection,
-            engine="adbc",
-            if_table_exists=if_table_exists,
-        )
+    batches[0]
+    .write_database(
+        table_name=table_name,
+        connection=connection,
+        engine="adbc",
+        if_table_exists=if_table_exists,
     )
-
+    
     # After the first chunk, we need to append records
     if_table_exists = "append"
 ```
-Notice that we are amending the if_table_exists variable after the first run. Otherwise we would constantly be replacing the table with the latest chunk from the csv file. 
+Notice that we are amending the `if_table_exists` variable after the first run. Otherwise we would constantly be replacing the table with the latest chunk from the csv file. 
 
 ### Passing dtypes
 To speed things up further, we can pass Polars the data types of our fields in the csv file. Polars, by default, will use the first 100 rows of data to infer the data type of each column. If the first 100 rows are null or it is ambiguous, the dtype defaults to string. We want to prevent this. If we have lots of columns or if we ask Polars to check more than 100 rows (through the infer_schema_length parameter), this could also impact our ingestion performance. Finally, Polars tends to prefer larger memory data types than smaller (though I can't find this exactly in their documenation). It seems to default to Int64 for rows which might only contain 1 and 2. 
 
-To pass the dtypes, we use the dtypes parameter in the read_csv and read_csv_batched functions. dtypes should be an OrderedDict Type. For the yellow taxi data, it might look like this
+To pass the dtypes, we use the dtypes parameter in the `read_csv` and `read_csv_batched` functions. dtypes should be an `OrderedDict` Type. For the yellow taxi data, it might look like this
 ```python
 # Batch the csv file for reading later
 from collections import OrderedDict
@@ -113,7 +112,7 @@ dtypes = OrderedDict(
 csv_reader = pl.read_csv_batched(file_name, dtypes=dtypes)
 ```
 
-If you run again at this stage, you should see the data types in the database change. Some integer fields go from BIGINT to INTEGER, which should use less memory.
+If you run again at this stage, you should see the data types in the database change. Some integer fields go from `BIGINT` to `INTEGER`, which should use less memory.
 
 ### Renaming, Adding or Dropping Columns
 We can easily add, remove or update columns in Polars. In fact, this can be done very efficiently by chaining the function calls together like so
@@ -178,18 +177,15 @@ new_columns = [
 drop_columns = ["store_and_fwd_flag"]
 
 while (batches := csv_reader.next_batches(1)) is not None:
-    time_start = time()
-    record_counts = (
-        batches[0]
-        .rename(rename_columns)
-        .with_columns(new_columns)
-        .drop(drop_columns)
-        .write_database(
-            table_name=table_name,
-            connection=connection,
-            engine="adbc",
-            if_table_exists=if_table_exists,
-        )
+    batches[0]
+    .rename(rename_columns)
+    .with_columns(new_columns)
+    .drop(drop_columns)
+    .write_database(
+        table_name=table_name,
+        connection=connection,
+        engine="adbc",
+        if_table_exists=if_table_exists,
     )
 ```
 
@@ -223,7 +219,7 @@ import importlib
 schema = importlib.import_module("config.schema_" + table_name)
 ```
 
-And in our polars functions, we reference the schema variable
+And in our polars functions, we reference the `schema` variable
 ```python
 batches[0]
 .rename(schema.rename_columns)
