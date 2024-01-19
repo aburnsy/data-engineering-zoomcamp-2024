@@ -20,20 +20,20 @@ Polars is roughly **85% faster** than Pandas for our very simple ingestion scrip
 ### Reading CSV data with Polars
 Polars provides similar functionality to Pandas for loading from CSV. The main function `read_csv` loads all data from a file (options for n rows of course) into a dataframe which can be manipulated. 
 
-In our case, we want to batch load from the csv and pass each batch to the database. For that we can use read_csv_batched  function
+In our case, we want to batch load from the csv and pass each batch to the database. For that we can use the `read_csv_batched` function
 ```python
 csv_reader = pl.read_csv_batched(file_name)
 ```
-This returns a BatchedCsvReader type, which we can call next_batches on to load an array of dataframes corresponding to each batch.
+This returns a BatchedCsvReader type, which we can call `next_batches` method on, to load an array of dataframes, corresponding to each batch.
 ```python
 while (batches := csv_reader.next_batches(1)) is not None:
     print(batches[0].head(1))
 ```
-Here we are looping through our csv_reader, loading each batch and printing the first row from it. Notice the walrus operator we are using to set batches
+Here we are looping through our csv_reader, loading 1 batch and printing the first row from it. Notice the walrus operator:
 ```python
 batches := csv_reader.next_batches(1)
 ```
-That allows to set batches within the while statement. If csv_reader is exhausted, it will return None, exiting the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case, so its best to leave that set to 1 for now.
+This allows us to set the batches variable within the while statement. If csv_reader is exhausted, the `next_batches` method will return None and we will exit the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case, so its best to leave that set to 1 for now. This is an option to explore further another day.
 
 ### Writing to the database
 The write_database function allows us to write the dataframe back to the DB. We can use 1 of 2 engines to accomplish this - the default, sqlalchemy (which we also used for Pandas library) or ADBC. In the SQLAlchemy approach, Polars actually converts the df to a Pandas df backed by PyArrow and then uses SQLAlchemy methods on the Pandas df. ADBC or Arrow Database Connectivity is an engine supported by the Apache Arrow project. ADBC is in its infancy still and many databases are still not [feature complete](https://arrow.apache.org/adbc/main/driver/status.html). For want we are looking to accomplish, ADBC will work. Note on the link though that PostgreSQl does not have full type support. This is something I noticed myself when testing, as the full set of Polars DTypes aren't supported by adbc_driver_postgresql. 
