@@ -5,9 +5,12 @@ Polars is a data frame library, similar to Pandas. It is built in Rust and optim
 
 ## Starting with the results
 Polars Total Time Taken: 6.958 seconds
+
 Pandas Total Time Taken: 46.041 seconds
 
-Polars is roughly 85% faster than Pandas for our very simple ingestion script. Note that this isn't a perfect comparison. In my Polars script, I am creating a handful of new fields. In Polars too I am passing the dtypes of the fields, which does have an impact.
+Polars is roughly 85% faster than Pandas for our very simple ingestion script. 
+
+**Note** that this isn't a perfect comparison. In my Polars script, I am creating a handful of new fields. In Polars too I am passing the dtypes of the fields, which does have an impact.
 
 
 ## Updating Our Codebase
