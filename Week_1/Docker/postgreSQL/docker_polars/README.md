@@ -113,9 +113,9 @@ If you run again at this stage, you should see the data types in the database ch
 
 ### Renaming, Adding or Dropping Columns
 We can easily add, remove or update columns in Polars. In fact, this can be done very efficiently by chaining the function calls together like so
-```polars
+```python
 df
-.rename({'a':'b})
+.rename({'a':'b'})
 .with_columns([
     (pl.col("a").cast(pl.Date).alias("new_col_d")),
     (pl.col("b").cast(pl.Date).alias("new_col_e")),
