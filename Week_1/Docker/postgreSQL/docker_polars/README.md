@@ -49,7 +49,7 @@ We could add a dictionary for each table within the main ingest_data_polars.py s
 
 To avoid this, we can pass a volume across when running the image. Within this folder, we can have add a config file for each table. Any time we want to update the meta data within it, we can update the file directly. The next time the image is run, it will have access to the latest version of these files. 
 
-```Shell
+```bash
 docker run \
     --network=postgresql_default \
     -v D:/Development/data-engineering-zoomcamp-2024/Week_1/Docker/postgreSQL/docker_polars/config:/app/config \
