@@ -1,7 +1,7 @@
 # Converting our data ingestion to use Polars + Some general improvements to the script
 
 ## What is Polars
-Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. This isn't an 'Intro to Polars' article OR a 'Pandas v Polars' article (of which there are many online - including some by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). So I'll leave the intro at that.
+Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. This isn't an 'Intro to Polars' article OR a 'Pandas v Polars' article (of which there are many online - including some by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). The best way to learn about Polars is to play around with it yourself.
 
 ## Starting with the results
 | Library | Total Time Taken |
@@ -18,11 +18,11 @@ Polars is roughly **85% faster** than Pandas for our very simple ingestion scrip
 
 
 ### Reading CSV data with Polars
-Polars provides similar functionality to Pandas for loading from CSV. The main function read_csv loads all data from a file (options for n rows of course) into a dataframe which can be manipulated. 
+Polars provides similar functionality to Pandas for loading from CSV. The main function `read_csv` loads all data from a file (options for n rows of course) into a dataframe which can be manipulated. 
 
 In our case, we want to batch load from the csv and pass each batch to the database. For that we can use read_csv_batched  function
 ```python
-    csv_reader = pl.read_csv_batched(file_name)
+csv_reader = pl.read_csv_batched(file_name)
 ```
 This returns a BatchedCsvReader type, which we can call next_batches on to load an array of dataframes corresponding to each batch.
 ```python
