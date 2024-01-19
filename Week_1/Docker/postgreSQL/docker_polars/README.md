@@ -244,12 +244,15 @@ There are a number of further improvements I would like to make from this point:
 1. Improve configuration management
 
 In the current implementation, our script would fail if we passed a table with no corresponding schema.py file. It would be nice to have a config management script setup with proper defaults for the necessary inputs. 
+
 2. Push postgres info to a config file
 
 Similar to (1) above. Passing the host, port etc. is redundant.
+
 3. Use SOLID on main() function
 
-Using SOLID principles (which are generally for OOP but can be applied to functional paradigm also) we could improve the flow in the main function. 
+Using SOLID principles (which are generally for OOP but can be applied to the functional paradigm also), we could improve the flow in the main function. 
+
 4. Add Unit Testing
 
 We could add unit tests to our functions after we have applied SOLID principles.
