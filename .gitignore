@@ -159,11 +159,9 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-Week_1/Docker/postgreSQL/ny_taxi_postgres_data/**
-Week_1/Docker/postgreSQL/pg_admin_data/**
-**input_csvs**
-**/output.csv
+# Postgres DB Data
+**/ny_taxi_postgres_data/**
+**/pg_admin_data/**
+
+# Keys and Configuration Settings
 config/**
-**homework.md
-**homework.txt
-# .ipynb_checkpoints

@@ -13,6 +13,11 @@ Polars is roughly **85% faster** than Pandas for our very simple ingestion scrip
 
 **Note** that this isn't a perfect comparison. In my Polars script, I am creating a handful of new fields. In Polars too I am passing the dtypes of the fields, which does have an impact.
 
+## Python Scripts
+The final script can be found [here](ingest_data_polars.py).
+
+The original script using Pandas can be found [here](..\ingestion\ingest_data.py).
+
 
 ## Updating Our Codebase
 
@@ -213,7 +218,7 @@ docker run \
     --host=pgdatabase \
     --port=5432 \
     --db=ny_taxi \
-    --table_name=yellow_taxi_data \
+    --table_name=yellow_taxi \
     --url=${TAXI}     
 ```
 > We have mapped our local config folder to the /app/config folder.
@@ -221,8 +226,8 @@ docker run \
 We can add files for each table in our config folder. Our structure should look like this:
 ```bash
     ├── config                              
-    │   ├── schema_yellow_taxi_data.py      # Contains dtypes, rename_columns and other dictionaries needed for taxi data
-    │   ├── schema_zone_data.py             # Contains dtypes, rename_columns and other dictionaries needed for zone data
+    │   ├── schema_yellow_taxi.py           # Contains dtypes, rename_columns and other dictionaries needed for taxi data
+    │   ├── schema_zone.py                  # Contains dtypes, rename_columns and other dictionaries needed for zone data
     ├── Dockerfile
     ├── .dockerignore                       # Should include the config folder as we don't want that included in Docker context during build
     └── ingest_data_polars.py               # Our polars ingestion script
@@ -251,8 +256,7 @@ batches[0]
 )
 ```
 
-## Final Script
-The final script can be found [here](ingest_data_polars.py).
+
 
 
 ## Further improvements
@@ -268,3 +272,6 @@ There are a number of further improvements I would like to make from this point:
 
 4. Add Unit Testing  
   We could add unit tests to our functions after we have applied SOLID principles.
+
+5. Incorporate Proper Module Management  
+  We should lock down versions of modules used. This could be accomplished with piptools or other module management libraries.
