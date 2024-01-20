@@ -3,6 +3,8 @@
 ## What is Polars
 Polars is a data frame library, similar to Pandas. It is built in Rust and optimised for speed. There are numerous articles out there on 'Intro to Polars' OR 'Pandas v Polars' (including a good one by our course Tutor [Luis](https://medium.com/gitconnected/polars-vs-dask-fighting-on-parallel-computing-f2a17a100274)). 
 
+
+
 ## Starting with the results
 | Library | Total Time Taken |
 | --- | --- |
@@ -13,10 +15,13 @@ Polars is roughly **85% faster** than Pandas for our very simple ingestion scrip
 
 **Note** that this isn't a perfect comparison. In my Polars script, I am creating a handful of new fields. In Polars too I am passing the dtypes of the fields, which does have an impact.
 
+
+
 ## Python Scripts
 The final script can be found [here](ingest_data_polars.py).
 
 The original script using Pandas can be found [here](../ingestion/ingest_data.py).
+
 
 
 ## Updating Our Codebase
@@ -43,6 +48,8 @@ batches := csv_reader.next_batches(1)
 > Walrus Operator := allows us to set the `batches` variable within the while statement. 
 
 If `csv_reader` is exhausted, the `next_batches` method will return None and we will exit the While loop. The 1 here refers to the number of chunks we want to fetch at any one time. We could fetch multiple chunks and concatenate them before passing to the database, but the DB will be the bottleneck in our case. It is best to leave that set to 1 for now. Though this is an option to explore further another day.
+
+
 
 ### Writing to the database
 The `write_database` function allows us to write the dataframe back to the DB. We can use 1 of 2 engines to accomplish this:
@@ -87,6 +94,8 @@ while (batches := csv_reader.next_batches(1)) is not None:
 ```
 > We are amending the `if_table_exists` variable after the first run. Otherwise, we would replace the table with the latest chunk on each iteration. 
 
+
+
 ### Passing dtypes
 Polars, by default, will use the first 100 rows of data to infer the data type of each column. If the first 100 rows are null, or the entries are ambiguous, the dtype defaults to string. 
 If we have lots of columns or if we ask Polars to check more than 100 rows (through the `infer_schema_length` parameter), this could impact ingestion performance. Finally, Polars tends to prefer larger memory data types than smaller (though I can't find this exactly in their documenation). It seems to default to Int64 for rows which might only contain 1 and 2. 
@@ -123,6 +132,8 @@ csv_reader = pl.read_csv_batched(file_name, dtypes=dtypes)
 ```
 
 If you run the script again, you should see the data types in the database change. Some integer fields go from `BIGINT` to `INTEGER`, which should use less memory and ultimately improve query and join speeds.
+
+
 
 ### Renaming, Adding or Dropping Columns
 We can easily add, remove or update columns in Polars. In fact, this can be done very efficiently by chaining the function calls together like so:
@@ -203,6 +214,8 @@ If we re-run our script now, we should see our new fields get created.
 
 It would be a better idea to push the dictionary data for the `rate_code` and `payment_type` fields into a new table in the database. I'm leaving them in purely as an example of what we can do with Polars.
 
+
+
 ### Adding Schema/Config Data through Attached Volume
 
 We could add a dictionary for each table, within the main `ingest_data_polars.py` script, however, each time we wanted to change the data type, we would need to rebuild our Docker image. Its also not a great idea to mix configuration and application code. 
@@ -255,7 +268,6 @@ batches[0]
     if_table_exists=if_table_exists,
 )
 ```
-
 
 
 

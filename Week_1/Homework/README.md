@@ -1,5 +1,3 @@
-## Module 1 Homework
-
 ## Docker & SQL
 
 ## Question 1. Knowing docker tags
