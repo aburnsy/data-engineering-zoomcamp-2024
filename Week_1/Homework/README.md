@@ -11,8 +11,7 @@
 
 
 ## Question 3. Count records 
-
-How many taxi trips were totally made on September 18th 2019?
+- 15612
 
 ```SQL
 SELECT count(1)
@@ -20,8 +19,7 @@ FROM yellow_taxi
 WHERE start_date = '2019-09-18'
 AND end_date = '2019-09-18';
 ```
-> SQL Used. Note: The ingestion scripts were amended to use Polars + transform the data. You can find those scripts [here](..\Docker\ny_taxi\ingestion_polars)
-- 15612
+> SQL Used. Note: The ingestion scripts were amended to use Polars + transform the data. You can find those scripts [here](../Docker/ny_taxi/ingestion_polars/README.md)
 
 
 ## Question 4. Largest trip for each day

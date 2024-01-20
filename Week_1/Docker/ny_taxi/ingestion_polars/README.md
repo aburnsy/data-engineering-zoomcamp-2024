@@ -16,7 +16,7 @@ Polars is roughly **85% faster** than Pandas for our very simple ingestion scrip
 ## Python Scripts
 The final script can be found [here](ingest_data_polars.py).
 
-The original script using Pandas can be found [here](..\ingestion\ingest_data.py).
+The original script using Pandas can be found [here](../ingestion/ingest_data.py).
 
 
 ## Updating Our Codebase
