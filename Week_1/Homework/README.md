@@ -12,7 +12,6 @@
 
 ## Question 3. Count records 
 - 15612
-
 ```SQL
 SELECT count(1)
 FROM yellow_taxi
@@ -23,67 +22,103 @@ AND end_date = '2019-09-18';
 
 
 ## Question 4. Largest trip for each day
-
-Which was the pick up day with the largest trip distance
-Use the pick up time for your calculations.
-
-- 2019-09-18
-- 2019-09-16
 - 2019-09-26
-- 2019-09-21
-
+```SQL
+SELECT start_date
+FROM yellow_taxi
+WHERE trip_distance = (SELECT max(trip_distance) FROM yellow_taxi)
+```
 
 ## Question 5. Three biggest pick up Boroughs
-
-Consider lpep_pickup_datetime in '2019-09-18' and ignoring Borough has Unknown
-
-Which were the 3 pick up Boroughs that had a sum of total_amount superior to 50000?
- 
 - "Brooklyn" "Manhattan" "Queens"
-- "Bronx" "Brooklyn" "Manhattan"
-- "Bronx" "Manhattan" "Queens" 
-- "Brooklyn" "Queens" "Staten Island"
+```SQL
+SELECT z.borough
+FROM yellow_taxi y
+JOIN zone z ON y.start_location_id = z.location_id
+WHERE y.start_date = '2019-09-18'
+AND z.borough <> 'Unknown'
+GROUP BY z.borough
+HAVING sum(y.total_amount) > 50000
+ORDER BY sum(y.total_amount) DESC
+```
 
 
 ## Question 6. Largest tip
-
-For the passengers picked up in September 2019 in the zone name Astoria which was the drop off zone that had the largest tip?
-We want the name of the zone, not the id.
-
-Note: it's not a typo, it's `tip` , not `trip`
-
-- Central Park
-- Jamaica
 - JFK Airport
-- Long Island City/Queens Plaza
+```SQL
+SELECT en.zone
+FROM yellow_taxi y
+JOIN zone st ON y.start_location_id = st.location_id
+JOIN zone en ON y.end_location_id = en.location_id
+WHERE EXTRACT(MONTH FROM y.start_date) = 9
+AND EXTRACT(YEAR FROM y.start_date) = 2019
+AND st.zone = 'Astoria'
+GROUP BY en.zone
+ORDER BY max(y.tip_amount) DESC
+LIMIT 1
+```
 
 
 
 ## Terraform
-
-In this section homework we'll prepare the environment by creating resources in GCP with Terraform.
-
-In your VM on GCP/Laptop/GitHub Codespace install Terraform. 
-Copy the files from the course repo
-[here](https://github.com/DataTalksClub/data-engineering-zoomcamp/tree/main/01-docker-terraform/1_terraform_gcp/terraform) to your VM/Laptop/GitHub Codespace.
-
-Modify the files as necessary to create a GCP Bucket and Big Query Dataset.
-
-
 ## Question 7. Creating Resources
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
 
-After updating the main.tf and variable.tf files run:
+Terraform will perform the following actions:
 
-```
-terraform apply
-```
+  # google_bigquery_dataset.demo_dataset will be created
+  + resource "google_bigquery_dataset" "demo_dataset" {
+      + creation_time              = (known after apply)
+      + dataset_id                 = "andy-homework-dataset-name"
+      + default_collation          = (known after apply)
+      + delete_contents_on_destroy = false
+      + effective_labels           = (known after apply)
+      + etag                       = (known after apply)
+      + id                         = (known after apply)
+      + is_case_insensitive        = (known after apply)
+      + last_modified_time         = (known after apply)
+      + location                   = "US"
+      + max_time_travel_hours      = (known after apply)
+      + project                    = "terraformproject-123489"
+      + self_link                  = (known after apply)
+      + storage_billing_model      = (known after apply)
+      + terraform_labels           = (known after apply)
+    }
 
-Paste the output of this command into the homework submission form.
+  # google_storage_bucket.demo-bucket will be created
+  + resource "google_storage_bucket" "demo-bucket" {
+      + effective_labels            = (known after apply)
+      + force_destroy               = true
+      + id                          = (known after apply)
+      + location                    = "US"
+      + name                        = "andy-homework-terra-bucket"
+      + project                     = (known after apply)
+      + public_access_prevention    = (known after apply)
+      + self_link                   = (known after apply)
+      + storage_class               = "STANDARD"
+      + terraform_labels            = (known after apply)
+      + uniform_bucket_level_access = (known after apply)
+      + url                         = (known after apply)
 
+      + lifecycle_rule {
+          + action {
+              + type = "AbortIncompleteMultipartUpload"
+            }
+          + condition {
+              + age                   = 1
+              + matches_prefix        = []
+              + matches_storage_class = []
+              + matches_suffix        = []
+              + with_state            = (known after apply)
+            }
+        }
+    }
 
-## Submitting the solutions
+Plan: 2 to add, 0 to change, 0 to destroy.
 
-* Form for submitting: https://courses.datatalks.club/de-zoomcamp-2024/homework/hw01
-* You can submit your homework multiple times. In this case, only the last submission will be used. 
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
 
-Deadline: 29 January, 23:00 CET
+  Enter a value:
