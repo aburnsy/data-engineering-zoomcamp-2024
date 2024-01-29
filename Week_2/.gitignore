@@ -1,0 +1,4 @@
+data
+.terraform
+*.hcl
+*.tfstate
