@@ -1,7 +1,5 @@
 ## Big Query
 
-```
-
 ## Question 1: What is count of records for the 2022 Green Taxi Data??
 - `840,402`
 ```SQL
