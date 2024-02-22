@@ -4,7 +4,8 @@
 {% macro get_payment_type_description(payment_type) -%}
 
     case
-        cast({{ payment_type }} as integer)
+        -- dbt.safe_cast("payment_type", api.Column.translate_type("integer"))
+        cast(replace({{ payment_type }},'.0','') as integer)
         when 1
         then 'Credit card'
         when 2
