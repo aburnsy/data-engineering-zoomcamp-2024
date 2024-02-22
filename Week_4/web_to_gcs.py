@@ -13,7 +13,7 @@ Pre-reqs:
 # services = ['fhv','green','yellow']
 init_url = "https://github.com/DataTalksClub/nyc-tlc-data/releases/download/"
 # switch out the bucketname
-BUCKET = os.environ.get("GCP_GCS_BUCKET", "zoomcamp_week4_bigquery_andy_burns")
+BUCKET = os.environ.get("GCP_GCS_BUCKET", "zoomcamp_week3_bigquery_andy_burns")
 os.environ[
     "GOOGLE_APPLICATION_CREDENTIALS"
 ] = "D:\\Development\\data-engineering-zoomcamp-2024\\config\\terraformproject-123489-7ebacaa3e92b.json"
@@ -35,7 +35,7 @@ def upload_to_gcs(bucket, object_name, local_file):
 
 
 def web_to_gcs(year, service):
-    for i in range(1, 12):
+    for i in range(1, 13):
         # csv file_name
         file_name = f"{service}_tripdata_{year}-{str(i).zfill(2)}.csv.gz"
 
@@ -47,6 +47,11 @@ def web_to_gcs(year, service):
 
         # read it back into a parquet file
         df = pd.read_csv(file_name, compression="gzip")
+
+        df["PUlocationID"] = df["PUlocationID"].fillna(0).astype("int64")
+        df["DOlocationID"] = df["DOlocationID"].fillna(0).astype("int64")
+        df["SR_Flag"] = df["SR_Flag"].fillna(0).astype("int64")
+
         os.remove(file_name)
         file_name = file_name.replace(".csv.gz", ".parquet")
         df.to_parquet(file_name, engine="pyarrow")

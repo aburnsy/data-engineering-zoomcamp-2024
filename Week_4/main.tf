@@ -38,7 +38,7 @@ resource "google_bigquery_dataset" "trips_data_all" {
   friendly_name               = "trips_data_all"
   description                 = "Taxi data for week 4"
   location                    = "US"
-  default_table_expiration_ms = 3600000
+  default_table_expiration_ms = 360000000
 
   labels = {
     env = "default"
